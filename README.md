@@ -27,3 +27,28 @@
 Итоговый экран повторит размеры и геометрию исходного Frame. Интерфейс будет собран из нативных слоёв Figma и Auto Layout с редактируемыми текстами, подобранными шрифтами, векторными иконками, изображениями из `assets/`, градиентами, прозрачностью, обводками, тенями и blur-эффектами.
 
 Референсы обрабатываются последовательно: навык полностью собирает и проверяет один экран, исправляет визуальные расхождения и только затем переходит к следующему.
+
+
+## Material analysis and reference handoff
+
+Complex surfaces are reconstructed as layered materials: backgrounds, fills, gradients, translucency, blur, borders, highlights and shadows. Ambiguous constructions are compared in context and assumptions are recorded.
+
+Each reference produces a local `reference-packs/<reference-id>/` package:
+
+- `reference.md`: a readable handoff for another agent.
+- `reference.json`: structure, tokens, material recipes, components, composition, behavior, tags and quality.
+- `art-direction.md`: defining visual principles and acceptance criteria.
+- `art-review.md`: evidence, findings, correction history and verdict.
+
+## Art director review
+
+The art director inspects actual screenshots against the original reference and provides concrete corrections. A separate reviewer agent is used when available; otherwise the report explicitly identifies self-review. Up to three correction cycles are performed per reference. Any remaining issues are recorded before proceeding; unavailable visual evidence results in an `unverified` verdict rather than approval. This bounded review qualifies the sequential completion workflow above.
+
+## Optional code twin
+
+Ask for a code twin to generate a version from the same reference model using the current project stack, or standalone HTML/CSS in an empty workspace. The browser render is checked independently against the original reference.
+
+```text
+Use $figma-compozer for this Figma link: <link>.
+Save the reference description and also create a code twin.
+```

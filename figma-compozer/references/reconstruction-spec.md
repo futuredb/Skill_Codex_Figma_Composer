@@ -64,7 +64,7 @@ A valid source frame must provide:
 * a stable coordinate system for the image;
 * the clipping and corner geometry of the intended screen.
 
-Ignore unrelated images, illustrations, thumbnails, assets, style guides, and media that do not represent a complete UI reference. When the user supplies a specific selection or linked nodes, do not scan unrelated areas of the file.
+Ignore unrelated images, illustrations, thumbnails, assets, style guides, and media that do not represent a complete UI reference. When the user supplies a specific selection or linked nodes, do not scan unrelated areas of the file for additional reference screens. The separate media-asset search below may inspect other components and pages in the supplied file solely to reuse their images; this does not expand the reconstruction queue.
 
 If several valid source frames exist, treat each one as a separate screen reference unless their visible image content clearly forms one continuous screen.
 
@@ -145,9 +145,13 @@ Each output frame must contain only the reconstructed application interface corr
 
 Do not combine several references into one screen or create documentation, specimen, design-system, component-showcase, measurement, or explanatory frames.
 
+# Material Evidence and Deliverables
+
+Read and apply [materials-and-handoff.md](materials-and-handoff.md). Save the shared reference package alongside the reconstruction; generate a code twin when requested. Material hypotheses must be evidence-based, with uncertainty recorded. A screenshot does not uniquely determine the underlying effect parameters.
+
 # Reconstruction Priorities
 
-Use this priority order for every reference:
+First identify visually dominant materials. Establish and validate those materials alongside the major layout before fine typography work; they must not be deferred because effects appear later in the checklist. Use the following order for remaining detail work:
 
 1. Typeface character for the current reference.
 2. Consolidation of similar typography styles inside that reference.
@@ -414,7 +418,7 @@ For the active reference, follow this order:
 16. Normalize related dimensions and spacing.
 17. Reconstruct containers and surfaces.
 18. Reconstruct editable text layers.
-19. Reconstruct icon backgrounds and source editable icons; use bundled image assets or media placeholders as required.
+19. Reconstruct icon backgrounds and source editable icons; reuse image Fills from the supplied file first, then use bundled assets or media placeholders only as fallbacks.
 20. Reproduce corner geometry.
 21. Reproduce intentional rotations.
 22. Reproduce solid fills and gradients.
@@ -434,7 +438,7 @@ After every major block:
 3. Compare it with the same region in the source reference.
 4. Correct visible geometry, typography, clipping, Fill, gradient, opacity, blur, Stroke, and overlap errors before continuing.
 
-Do not postpone known errors until the complete screen is built. Do not start another independent source frame while the active screen has placeholders, unverified blocks, known mismatches, or missing final validation.
+Do not postpone known errors until the complete screen is built. Complete the active screen review before starting another independent source frame. Apply the bounded review and honest verdict rules in [art-director.md](art-director.md): if correction limits or unavailable evidence prevent approval, record remaining mismatches and the needs_revision or unverified status before proceeding. Never describe that stop as a passed validation.
 
 Do not start by creating generic UI components.
 
@@ -2012,16 +2016,16 @@ For every surface whose opacity is uncertain:
 
 1. Sample or estimate the background immediately outside the object (`B`) and the visible object interior (`O`) away from strokes, text, shadows, and antialiased edges.
 2. Compare hue family first, then saturation and lightness. Treat colors as close when they share the same dominant hue and the object mainly appears as a lighter, darker, or less saturated version of the background.
-3. When `O` and `B` are close shades, set the working probability of translucency to `90%`. Start reconstruction with a translucent Fill and require contrary visual evidence before changing it to opaque.
+3. Similar shades alone do not establish transparency. Compare opaque and translucent hypotheses using underlying detail and appearances over different backgrounds.
 4. Infer a plausible uncomposited foreground color (`F`) from the same semantic surface elsewhere, a repeated state, a highlight or border family, or the simplest neutral/tinted source that explains the result.
 5. Test the composite relation `O = alpha × F + (1 - alpha) × B` across RGB channels. Try nearby alpha values in Figma over the actual reconstructed background and select the value that explains all channels without baking the background into `F`.
 6. If the object crosses two backgrounds, compare both regions. A translucent object keeps one `F` and one alpha while its observed color shifts toward each underlying background. Reject an opaque Fill when one sampled RGB cannot explain both regions.
 7. Inspect intersections. Greater density where translucent layers overlap supports transparency; unchanged color across different backgrounds supports opacity.
-8. If the evidence remains ambiguous after these tests, choose translucency. Use the narrowest native Figma control that can express it.
+8. If evidence remains ambiguous, render both plausible hypotheses in context, choose the simplest visually supported construction, and record the alternative and low confidence. Use the narrowest native Figma control that can express the chosen construction.
 
-Do not use the 90% rule as the final alpha value. It is a confidence prior for classifying the layer as translucent; estimate the actual Fill, paint, stop, effect, child, or layer opacity separately.
+Estimate Fill, paint, stop, effect, child, or layer opacity separately. A single foreground/background sample cannot uniquely recover both foreground color and alpha; the composite equation is a hypothesis check, not proof of the original construction.
 
-Evidence strong enough to override the transparency prior includes a sharply bounded surface whose interior stays identical over clearly different backgrounds, an independently repeated solid token with the same uncomposited color, or a source construction that visibly occludes all underlying detail. A small color difference alone is not enough to classify the object as opaque.
+Evidence supporting an opaque construction includes a sharply bounded surface whose interior stays identical over clearly different backgrounds, an independently repeated solid token with the same uncomposited color, or a source construction that visibly occludes all underlying detail. A small color difference alone is not enough to classify the object as opaque.
 
 Exclude misleading causes before estimating opacity:
 
@@ -2229,20 +2233,23 @@ Do not include duplicate icon backgrounds bundled inside a component. Hide or re
 
 ## Image Assets
 
-For photographs, avatars, food, animals, people, places, products, and other raster media, inspect the skill's bundled `assets/` directory before creating a placeholder.
+For photographs, avatars, illustrations, products, and other raster media, use this source priority:
 
-Do not classify the reference subject and do not search for the closest image. Use any usable image file from `assets/` regardless of subject, composition, crop, camera distance, orientation, aspect ratio, dominant color, brightness, or visual density.
+1. Existing usable image Fills in the user-supplied Figma file.
+2. The skill's bundled `assets/` images only when no usable file image is accessible.
+3. The shared gradient placeholder only when neither source provides usable images.
 
-When several raster-media containers are present:
+The supplied file is the primary image library. Inspect image-filled layers inside existing components, component instances, frames, and other content. Start on the reference page; if needed, inspect other pages in the same file using the supported per-page workflow. The reference-screen discovery scope remains unchanged: donor components and pages supply images, not additional screens to reconstruct. Do not stop at the linked node and conclude that there are no images elsewhere in the file. If access prevents further inspection, record that limitation before using a fallback.
 
-1. Enumerate the usable image files in `assets/` once.
-2. Assign different files in a simple sequence or round-robin order.
-3. Do not reuse one file while another available file has not yet been used.
-4. After every available file has been used once, repeat them only as necessary and continue varying adjacent containers.
+Any usable photo or image from this file is acceptable, regardless of subject, composition, colors, orientation, aspect ratio, or semantic relevance. Choose randomly, sequentially, or by meaning when convenient; matching the reference subject is optional and must not delay construction. Exclude complete UI screenshots, device mockups, and flattened interface exports from the media pool. Do not use the reference screenshot itself as a photograph or crop it into substitute media. This rule does not change the requirement for editable vector icons.
 
-Use the selected asset as an editable Figma image Fill inside the reconstructed media container. Preserve the reference's crop mode, clipping, corner radius, Corner smoothing, rotation, Stroke, Effects, and Opacity. Position the arbitrary asset only to fill the measured media bounds cleanly; do not spend time matching the reference focal point or composition.
+For each candidate, record its donor page/node ID, image Fill index, and `imageHash`. Deduplicate candidates by image hash. Reuse the existing image hash directly in a new editable image Fill inside the reconstructed media container; downloading and reuploading an image already available in the file is unnecessary. Copy the image asset, not the entire donor component or its layout. Preserve donor nodes unchanged.
 
-An unrelated bundled image is valid and must be preferred over a placeholder. If `assets/` does not exist or contains no usable image file, use an editable placeholder with the shared vertical gradient:
+When several raster-media containers are present, use different images from the file pool before repeating one. Once all available file images have been used, cycle through them as needed rather than switching to bundled assets just to avoid repetition. Apply the same variety rule to bundled assets when that fallback is necessary.
+
+Preserve the reference media container's dimensions, crop mode, clipping, corner radius, Corner smoothing, rotation, Stroke, Effects, and Opacity. Fit the chosen image cleanly within those bounds; the donor's geometry, crop transform, filters, and effects do not automatically transfer to the reconstruction. Record the donor-to-output mapping and any fallback reason in the reference package.
+
+If neither accessible file images nor bundled assets are usable, use an editable placeholder with the shared vertical gradient:
 
 * top stop: `#D8E0EA` at `0%`;
 * bottom stop: `#BAC6D7` at `100%`;
@@ -2546,7 +2553,7 @@ Before finalizing every styled element, verify that:
 * shadow offset, blur, spread, color, and opacity match;
 * Background blur is not confused with Layer blur;
 * every uncertain surface was tested against its immediate background before an opaque RGB was accepted;
-* close object/background hues used the 90% translucency prior and were made opaque only when contrary evidence was found;
+* opacity decisions use visible compositing evidence, with ambiguous opaque/translucent alternatives recorded;
 * ambiguous cases resolve to native transparency rather than a background-mixed solid color;
 * the chosen foreground RGB and opacity reproduce the observed composite over every background the object crosses;
 * transparent fills use Fill opacity;
@@ -2700,7 +2707,7 @@ Before finalizing every reference, verify that:
 * repeated icons use one coherent visual family;
 * every icon is vector-backed and editable;
 * no icon uses a text layer, Unicode symbol, emoji, icon font, symbol font, converted font outline, or raster image;
-* raster media uses varied image files from bundled `assets/` without semantic or visual matching;
+* raster media first reuses varied image Fills from the supplied Figma file; semantic matching is optional, and bundled `assets/` are used only when no usable file image is accessible;
 * different assets are used before any available image is repeated;
 * fallback raster-media and keyboard placeholders use the editable top-to-bottom `#D8E0EA` to `#BAC6D7` gradient at `58%` Fill opacity;
 * media placeholders preserve dimensions, shape, smoothing, rotation, Stroke, Effects, and Opacity;
@@ -2734,7 +2741,7 @@ For every valid source frame containing a UI reference image, output:
 * icon backgrounds reconstructed independently from icon vectors;
 * editable vector icons sourced from enabled Figma libraries, the target file, or Figma Community, with visual style prioritized over exact semantic meaning;
 * no font character, Unicode symbol, emoji, or raster image used as an icon;
-* raster media sourced from any bundled `assets/` images in varied sequence without subject, composition, or aspect-ratio matching;
+* raster media sourced primarily from existing components and image-filled layers in the supplied Figma file, with optional semantic matching, varied use, and recorded donor IDs/image hashes; bundled `assets/` are a fallback only;
 * unavailable raster media replaced by editable placeholders using the vertical `#D8E0EA` to `#BAC6D7` gradient at `58%` Fill opacity;
 * system keyboard replaced by one placeholder using the same gradient;
 * no operating-system status bar;
